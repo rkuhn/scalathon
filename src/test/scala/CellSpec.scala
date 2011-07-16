@@ -25,19 +25,19 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
 
   "A Cell" should {
     "Send a registration to the controller" in {
-       within(100 millis) {
+       within(1000 millis) {
          startCellExpectingRegistration() 
       }
     }
     "error upon attempt to start before initialized " in {
-      within(100 millis) {
+      within(1000 millis) {
         evaluating {
           (startCellExpectingRegistration ? ControllerToCellStart).await.get
         } should produce [UnhandledMessageException]
       }
     }
     "error upon attempt to respond to other cells before initialized " in {
-      within(100 millis) {
+      within(1000 millis) {
         evaluating {
           (startCellExpectingRegistration ? ControllerToCellStart).await.get
         } should produce [UnhandledMessageException]

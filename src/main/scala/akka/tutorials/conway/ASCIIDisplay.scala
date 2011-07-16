@@ -5,7 +5,7 @@ import akka.actor.{ActorRef, Actor}
 /**
  * Very simple class to print out the board state.
  */
-class ASCIIDisplay(board:ActorRef) extends Actor {
+class ASCIIDisplay extends Actor {
 
   override def receive = {
     case BoardState(round:Int, boardState:Array[Array[Boolean]]) =>
