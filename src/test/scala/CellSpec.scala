@@ -31,14 +31,16 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
     }
     "error upon attempt to start before initialized " in {
       within(100 millis) {
-        val future = startCellExpectingRegistration() ? ControllerToCellStart
-        evaluating {future.await.get} should produce [UnhandledMessageException]
+        evaluating {
+          (startCellExpectingRegistration ? ControllerToCellStart).await.get
+        } should produce [UnhandledMessageException]
       }
     }
     "error upon attempt to respond to other cells before initialized " in {
       within(100 millis) {
-        val future = startCellExpectingRegistration() ? CellToCell(true, 1) 
-        evaluating {future.await.get} should produce [UnhandledMessageException]
+        evaluating {
+          (startCellExpectingRegistration ? ControllerToCellStart).await.get
+        } should produce [UnhandledMessageException]
       }
     }
     "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
