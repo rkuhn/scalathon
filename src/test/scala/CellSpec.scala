@@ -1,4 +1,4 @@
-package akka.tutorial.conway
+package akka.tutorials.conway
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{WordSpec, BeforeAndAfterAll}
@@ -9,10 +9,10 @@ import akka.testkit.TestKit
 class CellSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with TestKit {
   val controller = actorOf(new ControllerStub).start()
   val board = actorOf(new BoardStub).start()
-//  val cell = actorOf(new Cell(0,0,controller,board)).start()
+  val cell = actorOf(new Cell(0,0,controller,board)).start()
 
   override protected def afterAll() {
-//    cell.stop()
+    cell.stop()
   }
 }
 
