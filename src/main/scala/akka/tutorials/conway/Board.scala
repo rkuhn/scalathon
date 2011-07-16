@@ -22,6 +22,7 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef) extends Actor{
         boardList = boardList :+ createBoard()
       // Set the alive or dead
       boardList(round)(x)(y) = alive
+
       messageCountPerRound += round -> (messageCountPerRound.getOrElse(round, 0) + 1)
       
       println("messageCountPerRound: " + messageCountPerRound(round))
@@ -30,6 +31,7 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef) extends Actor{
           println("In if.. going to send message")
           val boardState = boardList(round).clone()
           displayRef ! BoardState(round, boardState)
+
       }
     }
   }
