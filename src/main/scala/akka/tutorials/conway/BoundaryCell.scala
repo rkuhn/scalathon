@@ -7,7 +7,7 @@ import akka.actor.Actor
   */ 
 class BoundaryCell extends Actor {
   override def receive = {
-    case CellToCell(alive:Boolean, round:Int) => reply CellToCell(false, round)
+    case CellToCell(alive:Boolean, round:Int) => self.reply(CellToCell(false, round))
   }
 }
 
