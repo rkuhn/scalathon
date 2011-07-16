@@ -44,7 +44,9 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
     "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
       within (1000 millis) {
         cell = startCellExpectingRegistration()
-        cell ! ControllerToCellInitialize(true, Array(actorOf(new DummyReceiver())))
+        val dummyNeighbor = actorOf(new DummyReceiver())
+        dummyNeighbor.start
+        cell ! ControllerToCellInitialize(true, Array(dummyNeighbor))
         cell ! ControllerToCellStart
         for (i <- 1 to 3) cell ! CellToCell(true, 0)
         for (i <- 1 to 5) cell ! CellToCell(false, 0)
