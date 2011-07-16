@@ -14,7 +14,7 @@ class Board(xSize:Int, ySize:Int, maxRoundsToKeep:Int) extends Actor{
       if (boardList.size <= round)
         boardList :+ createBoard()
       // Set the alive or dead
-      board(round)(x)(y) = alive
+      boardList(round)(x)(y) = alive
     }
 
     case RequestBoardState(round:Int) => {

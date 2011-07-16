@@ -6,7 +6,7 @@ import akka.actor.Actor._
 class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extends Actor {
   var alive:Boolean = _
   var neighbors:Array[ActorRef] = _
-  var round:Long = 0L
+  var round:Int = 0
 
   override def preStart() {
     controller ! CellRegistration(x, y)
