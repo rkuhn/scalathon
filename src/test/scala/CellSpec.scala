@@ -19,7 +19,7 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
 
   def startCellExpectingRegistration() = {
     cell = actorOf(new Cell(0,0,controller,board)).start()
-    expectMsg(CellRegistration(0,0))
+    expectMsg(('controller, CellRegistration(0,0)))
     cell
   }
 
@@ -41,17 +41,34 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
         evaluating {future.await.get} should produce [UnhandledMessageException]
       }
     }
+    "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
+      within (1000 millis) {
+        cell = startCellExpectingRegistration()
+        cell ! ControllerToCellInitialize(true, Array(actorOf(new DummyReceiver())))
+        cell ! ControllerToCellStart
+        for (i <- 1 to 3) cell ! CellToCell(true, 0)
+        for (i <- 1 to 5) cell ! CellToCell(false, 0)
+        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
+      }
+    }
   }
 }
 
 class ControllerStub(testActor:ActorRef) extends Actor {
   def receive = {
-    case msg => testActor ! msg
+    case msg => testActor ! ('controller, msg)
   }
 }
 
 class BoardStub(testActor:ActorRef) extends Actor {
   def receive = {
-    case msg => testActor ! msg
+    case msg => testActor ! ('board, msg)
   }
 }
+
+class DummyReceiver() extends Actor {
+  def receive = {
+    case _ => 
+  }
+}
+
