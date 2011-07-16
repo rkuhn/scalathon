@@ -18,18 +18,32 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
       this.alive = alive
       this.neighbors = neighbors
+      become(initialized)
+  }
+
+  def initialized:Receive = {
     case ControllerToCellStart => 
       neighbors.foreach(n => n ! CellToCell(alive, currentRound))
       board ! CellToBoard(alive, currentRound, x, y)
     case CellToCell(alive:Boolean, round:Int) => 
-      /* TODO: if round is complete, update the board, and reset the round states. */
-      if  (currentRound == round) 
+      if  (currentRound == round) { 
         currentRoundState.update(alive)
+        if (currentRoundState.isComplete) completeRound
+      }
       else if (currentRound + 1 == round)
         nextRoundState.update(alive)
       else
         println("How did we get here?")
   }
+
+  private def completeRound() {
+    alive = (currentRoundState.alive == 3 || (currentRoundState.alive == 2 && alive))
+    board ! CellToBoard(alive, currentRound, x, y)
+    currentRound = currentRound + 1
+    currentRoundState = nextRoundState
+    nextRoundState = new NeighborsState
+  }
+
 }
 
 class NeighborsState {
