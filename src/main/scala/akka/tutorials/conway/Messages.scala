@@ -1,9 +1,8 @@
 package akka.tutorials.conway
 
-import java.lang.Boolean
-import akka.actor.Actor
+import akka.actor.ActorRef
 
-case class ControllerToCellInitialize(alive:Boolean, neighbors:Array[Actor])
+case class ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef])
 case class ControllerToCellStart()
 case class ControllerToCellStop()
 
