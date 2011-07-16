@@ -3,6 +3,11 @@ package akka.tutorials.conway
 import akka.actor.{Actor, ActorRef}
 import akka.actor.Actor._
 
+/** Represents a cell in the life grid. Once initialized, this responds to messages from
+  * its neighbors, and when it gets messages from all of its neighbors for the current 
+  * round, it calculates its own state for the next round, notifies the board and all 
+  * neighbors what it will be next round.
+  */
 class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extends Actor {
   var alive:Boolean = _
   var neighbors:Array[ActorRef] = _
@@ -46,6 +51,9 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
 
 }
 
+/** This class is used by Cell actor to maintain the state
+  * of all of its neighbors for a specified round.
+  */
 class NeighborsState {
   private var dead_ = 0
   private var alive_ = 0
