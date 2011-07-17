@@ -19,16 +19,10 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
 
   def startCellExpectingRegistration() = {
     cell = actorOf(new Cell(0,0,controller,board)).start()
-    expectMsg(('controller, CellRegistration(0,0)))
     cell
   }
 
   "A Cell" should {
-    "Send a registration to the controller" in {
-       within(1000 millis) {
-         startCellExpectingRegistration() 
-      }
-    }
     "error upon attempt to start before initialized " in {
       within(1000 millis) {
         evaluating {
