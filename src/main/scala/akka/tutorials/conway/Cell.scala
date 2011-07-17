@@ -15,10 +15,11 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   var currentRoundState:NeighborsState = new NeighborsState()
   var nextRoundState:NeighborsState = new NeighborsState() 
 
+  /*
   override def preStart() {
     controller ! CellRegistration(x, y)
   }
-
+  */
   override def receive = {
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
       this.alive = alive

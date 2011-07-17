@@ -49,18 +49,29 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
         cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start
       }
     }
+    initializeCells()
+  }
+  
+  def controllerStart() {
+    if(initialStartState.isEmpty) {
+      throw new IllegalStateException("The game has not been initialized")
+    }
+    
+    //Start each cell
+    cells.flatten.foreach(_ ! ControllerToCellStart)
   }
 
 
   override def receive = {
-    case ControllerInitialize => controllerInitialize()
-    case CellRegistration(x:Int, y:Int) => {
+    case ControllerInitialize => controllerInitialize() // this will not also init cells
+   
+    case CellRegistration(x:Int, y:Int) => { // cell regristration is deprecated no need to do it anymore
       cellRegistrationCount += 1
-
       if (cellRegistrationCount == xSize * ySize) {
-        //initializeCells()
+        initializeCells()
       }
     }
+    case ControllerStart => controllerStart()
   }
 
   // Send the initialization message to each cell
@@ -77,13 +88,10 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
                 neighbors += getNeighbor(x+xOffset, y+yOffset)
             }
         }
-        cells(x)(y) ! ControllerToCellInitialize( initialStartState(x)(y), neighbors.toArray)
-
+        //on initalization, let's block until we know that all cells are successfully initialized
+        cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
       }
     }
-
-    //Start each cell
-    cells.flatten.foreach(_ ! ControllerToCellStart)
   }
 
     /**
