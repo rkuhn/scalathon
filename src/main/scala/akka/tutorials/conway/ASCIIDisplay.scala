@@ -11,7 +11,7 @@ class ASCIIDisplay extends Actor {
     case BoardState(round:Int, boardState:Array[Array[Boolean]]) =>
       if (boardState != null) {
         // Convert all the true values to '+' and false values to '.'
-        val board = boardState.map(_.map(
+        val board = boardState.par.map(_.map(
           if (_)
             "+"
           else

@@ -16,6 +16,9 @@ object Controller extends App {
   val display = actorOf(new ASCIIDisplay).start
   val controller = actorOf(new Controller(initialStartState, 10, display)).start
 
+  controller ! ControllerInitialize
+  controller ! ControllerStart
+
 }
 
 class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, displayActor:ActorRef) extends Actor{
