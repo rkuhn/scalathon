@@ -3,6 +3,8 @@ package akka.tutorials.conway
 import akka.actor.{ActorRef, Actor}
 import akka.actor.Actor._
 import javax.management.remote.rmi._RMIConnection_Stub
+import scala.Array._
+import collection.mutable.ArrayBuffer
 
 object Controller extends App {
 
@@ -24,9 +26,11 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   // Create the Board actor
   var boardActor:ActorRef = _
 
-  val cells = Array.ofDim[ActorRef](xSize, ySize)
+  var cells:Array[Array[ActorRef]] = _
 
   var cellRegistrationCount = 0
+
+  val boundaryCell = actorOf(new BoundaryCell).start()
 
   // create the Cells
   override def preStart() {
@@ -36,6 +40,8 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     ySize = initialStartState(0).size
 
      boardActor = actorOf(new Board(xSize, ySize, displayActor)).start()
+
+    cells = Array.ofDim[ActorRef](xSize, ySize)
 
     for (val x <- 0 to xSize){
       for (val y <- 0 to ySize){
@@ -57,24 +63,20 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
   // Send the initialization message to each cell
   def initializeCells(){
-    // Initialize the edge cases first
-    // TODO Actually initialize the edge cases
 
-    // Initialize all the central cells
-    for (val x <- 1 to xSize-1){
-      for (val y <- 1 to ySize-1){
-        // Super lazy way to do this initially. This should be cleaned up.
-        val neighbors = Array[ActorRef](
-          cells(x-1)(y),
-          cells(x+1)(y),
-          cells(x)(y-1),
-          cells(x)(y+1),
-          cells(x-1)(y-1),
-          cells(x-1)(y+1),
-          cells(x+1)(y-1),
-          cells(x+1)(y+1)
-        )
-        cells(x)(y) ! ControllerToCellInitialize( initialStartState(x)(y), neighbors)
+     // Initialize all the cells
+    for (x <- 0 to xSize){
+      for (y <- 0 to ySize){
+        var neighbors = new ArrayBuffer[ActorRef] ()
+
+        for (xOffset <- -1 to 1){
+            for (yOffset <- -1 to 1){
+              if (x!=0 || y !=0)
+                neighbors += getNeighbor(x+xOffset, y+yOffset)
+            }
+        }
+        cells(x)(y) ! ControllerToCellInitialize( initialStartState(x)(y), neighbors.toArray)
+
       }
     }
 
@@ -82,5 +84,15 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     cells.flatten.foreach(_ ! ControllerToCellStart)
   }
 
+    /**
+     * This will return the neighbor located at (x)(y)
+     * If that location is a boundary, then the boundary cell will be returned
+     */
+  def getNeighbor(x:Int, y:Int):ActorRef = {
+    if (x<0 || y <0 || x >= xSize || y >= ySize)
+      boundaryCell
+    else
+      cells(x)(y)
+  }
 
 }
