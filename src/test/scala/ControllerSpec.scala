@@ -10,21 +10,21 @@ import akka.util.duration._
 import akka.tutorials.conway._
 
 class ControllerSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with TestKit {
- // val controller = actorOf(new ControllerStub).start()
-  //val board = actorOf(Board(8,8,5)).start()
-
-    val cannedBoardState = Array.ofDim[Boolean](1, 1)
-    cannedBoardState(0)(0) = true
-    "A BoardActor must" should {
-      "send back an empty board" in {
-        val boardActor = actorOf(new Board(1, 1, testActor)).start()
-
+    
+    val xSize = 5
+    val ySize = 5
+    
+    val initialStartState = Array.ofDim[Boolean](xSize, ySize)
+    val maxRounds =  5
+    
+    "A ControllerActor" should {
+      " should initalize all of the neighbors when receiving a cell's registration" in {
+        val controllerActor = actorOf(new Controller(initialStartState, maxRounds, testActor)).start()
         within (1000 millis) {
-          boardActor !  CellToBoard(true, 0 , 0, 0)
-          expectMsg(BoardState(0,cannedBoardState))
+          controllerActor ! ControllerInitialize
         }
       }
-
     }
+    
 }
 

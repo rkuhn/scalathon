@@ -36,6 +36,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
    def controllerInitialize() {
     if (initialStartState.isEmpty)
       throw new IllegalArgumentException("The initial start state must not be an empty list")
+      
     xSize = initialStartState.size
     ySize = initialStartState(0).size
 
@@ -43,8 +44,8 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
     cells = Array.ofDim[ActorRef](xSize, ySize)
     
-    for (x <- 0 to xSize){
-      for (y <- 0 to ySize){
+    for (x <- 0 until xSize){
+      for (y <- 0 until ySize){
         cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start
       }
     }
@@ -57,7 +58,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
       cellRegistrationCount += 1
 
       if (cellRegistrationCount == xSize * ySize) {
-        initializeCells()
+        //initializeCells()
       }
     }
   }
