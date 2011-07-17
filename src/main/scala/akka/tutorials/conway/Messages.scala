@@ -3,6 +3,7 @@ package akka.tutorials.conway
 import akka.actor.ActorRef
 
 case class ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef])
+case class ControllerInitialize()
 case class ControllerToCellStart()
 case class ControllerToCellStop()
 

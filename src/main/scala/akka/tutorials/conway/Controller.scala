@@ -33,13 +33,13 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   val boundaryCell = actorOf(new BoundaryCell).start()
 
   // create the Cells
-  override def preStart() {
+   def controllerInitialize() {
     if (initialStartState.isEmpty)
       throw new IllegalArgumentException("The initial start state must not be an empty list")
     xSize = initialStartState.size
     ySize = initialStartState(0).size
 
-     boardActor = actorOf(new Board(xSize, ySize, displayActor)).start()
+    boardActor = actorOf(new Board(xSize, ySize, displayActor)).start()
 
     cells = Array.ofDim[ActorRef](xSize, ySize)
     
@@ -52,6 +52,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
 
   override def receive = {
+    case ControllerInitialize => controllerInitialize()
     case CellRegistration(x:Int, y:Int) => {
       cellRegistrationCount += 1
 
