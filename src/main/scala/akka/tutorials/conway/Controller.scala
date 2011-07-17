@@ -66,14 +66,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
 
   override def receive = {
-    case ControllerInitialize => controllerInitialize() // this will not also init cells
-   
-    case CellRegistration(x:Int, y:Int) => { // cell regristration is deprecated no need to do it anymore
-      cellRegistrationCount += 1
-      if (cellRegistrationCount == xSize * ySize) {
-        initializeCells()
-      }
-    }
+    case ControllerInitialize => controllerInitialize() // this will now also init cells
     case ControllerStart => controllerStart()
   }
 
