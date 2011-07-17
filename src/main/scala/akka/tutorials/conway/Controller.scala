@@ -43,8 +43,8 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
     cells = Array.ofDim[ActorRef](xSize, ySize)
 
-    for (val x <- 0 to xSize){
-      for (val y <- 0 to ySize){
+    for (val x <- 0 to xSize-1){
+      for (val y <- 0 to ySize-1){
         cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start
       }
     }
@@ -65,8 +65,8 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   def initializeCells(){
 
      // Initialize all the cells
-    for (x <- 0 to xSize){
-      for (y <- 0 to ySize){
+    for (x <- 0 to xSize-1){
+      for (y <- 0 to ySize-1){
         var neighbors = new ArrayBuffer[ActorRef] ()
 
         for (xOffset <- -1 to 1){
