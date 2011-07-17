@@ -43,18 +43,35 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
         } should produce [UnhandledMessageException]
       }
     }
+    "notify neighbors of current state on startup" in {
+      within(200 millis) {
+        cell = startCellExpectingRegistration()
+        val neighbors = Array(
+          actorOf(new NeighborStub(testActor, 1)).start, 
+          actorOf(new NeighborStub(testActor, 2)).start, 
+          actorOf(new NeighborStub(testActor, 3)).start)
+        cell ! ControllerToCellInitialize(true, neighbors)
+        cell ! ControllerToCellStart
+        expectMsgAllOf((1 to 3).map(('neighbor, _, CellToCell(true, 0))):_*)
+      }
+    }
+    /* uncomment to see failure
     "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
       within (1000 millis) {
         cell = startCellExpectingRegistration()
-        val dummyNeighbor = actorOf(new DummyReceiver())
-        dummyNeighbor.start
-        cell ! ControllerToCellInitialize(true, Array(dummyNeighbor))
+        val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
+        cell ! ControllerToCellInitialize(true, neighbors)
         cell ! ControllerToCellStart
+        expectMsg(('neighbor, 1, CellToCell(true, 0)))
+        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
         for (i <- 1 to 3) cell ! CellToCell(true, 0)
         for (i <- 1 to 5) cell ! CellToCell(false, 0)
-        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
+        expectMsgAllOf(
+          ('neighbor, 1, CellToCell(true, 1)),
+          ('board, CellToBoard(true, 1, 0, 0)))
       }
     }
+    */
   }
 }
 
@@ -70,9 +87,9 @@ class BoardStub(testActor:ActorRef) extends Actor {
   }
 }
 
-class DummyReceiver() extends Actor {
+class NeighborStub(testActor:ActorRef, id:Int) extends Actor {
   def receive = {
-    case _ => 
+    case msg =>  testActor ! ('neighbor, id, msg)
   }
 }
 

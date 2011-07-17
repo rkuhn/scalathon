@@ -27,9 +27,7 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   }
 
   def initialized:Receive = {
-    case ControllerToCellStart => 
-      neighbors.foreach(n => n ! CellToCell(alive, currentRound))
-      board ! CellToBoard(alive, currentRound, x, y)
+    case ControllerToCellStart =>  sendState
     case CellToCell(alive:Boolean, round:Int) => 
       if  (currentRound == round) { 
         currentRoundState.update(alive)
@@ -41,10 +39,16 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
         println("How did we get here?")
   }
 
+  private def sendState() {
+    neighbors.foreach(n => n ! CellToCell(alive, currentRound))
+    board ! CellToBoard(alive, currentRound, x, y)
+  }
+    
+
   private def completeRound() {
     alive = (currentRoundState.alive == 3 || (currentRoundState.alive == 2 && alive))
-    board ! CellToBoard(alive, currentRound, x, y)
     currentRound = currentRound + 1
+    sendState
     currentRoundState = nextRoundState
     nextRoundState = new NeighborsState
   }
