@@ -53,9 +53,9 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
         cell ! ControllerToCellInitialize(true, neighbors)
         cell ! ControllerToCellStart
         expectMsgAllOf((1 to 3).map(('neighbor, _, CellToCell(true, 0))):_*)
+        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
       }
     }
-    /* uncomment to see failure
     "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
       within (1000 millis) {
         cell = startCellExpectingRegistration()
@@ -71,7 +71,6 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
           ('board, CellToBoard(true, 1, 0, 0)))
       }
     }
-    */
   }
 }
 
