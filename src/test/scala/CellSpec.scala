@@ -71,6 +71,27 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
           ('board, CellToBoard(true, 1, 0, 0)))
       }
     }
+    "notify the board its dead when it recieves 1 alive and 7 dead neighbor messages" in {
+      within (1000 millis) {
+        cell = startCellExpectingRegistration()
+        val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
+        cell ! ControllerToCellInitialize(true, neighbors)
+        cell ! ControllerToCellStart
+        expectMsg(('neighbor, 1, CellToCell(true, 0)))
+        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
+        cell ! CellToCell(true, 0)
+        for (i <- 1 to 7) cell ! CellToCell(false, 0)
+        expectMsgAllOf(
+          ('neighbor, 1, CellToCell(false, 1)),
+          ('board, CellToBoard(false, 1, 0, 0)))
+      }
+    }
+    "notify the board its alive when it recieves 2 alive and 6 dead neighbor messages" in {
+      // TODO
+    }
+    "notify the board its dead when it recieves 4 alive and 4 dead neighbor messages" in {
+      // TODO
+    }
   }
 }
 
