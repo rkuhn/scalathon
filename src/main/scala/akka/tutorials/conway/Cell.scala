@@ -2,6 +2,7 @@ package akka.tutorials.conway
 
 import akka.actor.{Actor, ActorRef}
 import akka.actor.Actor._
+import scala.collection.mutable.Map
 
 /** Represents a cell in the life grid. Once initialized, this responds to messages from
   * its neighbors, and when it gets messages from all of its neighbors for the current 
@@ -14,39 +15,36 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   var currentRound:Int = 0
   var currentRoundState:NeighborsState = new NeighborsState()
   var nextRoundState:NeighborsState = new NeighborsState() 
-
-  /*
-  override def preStart() {
-    controller ! CellRegistration(x, y)
-  }
-  */
+  val roundToNeighborsState = Map[Int, NeighborsState]()
+  
   override def receive = {
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
       this.alive = alive
       this.neighbors = neighbors
       become(initialized)
+      
   }
 
   def initialized:Receive = {
     case ControllerToCellStart =>  sendState
     case CellToCell(alive:Boolean, round:Int) => 
-      if  (currentRound == round) { 
-        currentRoundState.update(alive)
-        if (currentRoundState.isComplete) completeRound
-      }
-      else if (currentRound + 1 == round)
-        nextRoundState.update(alive)
-      else
-        println("How did we get here?")
+      val neighborsState = roundToNeighborsState.getOrElse(round, new NeighborsState())
+      neighborsState.update(alive)
+      roundToNeighborsState += round -> neighborsState
+      if (neighborsState.isComplete) completeRound
+    case ControllerToCellStop => become(stopped)
+  }
+  
+  def stopped:Receive = {
+    case _ =>
   }
 
-  private def sendState() {
+  private def sendState() = {
     neighbors.foreach(n => n ! CellToCell(alive, currentRound))
     board ! CellToBoard(alive, currentRound, x, y)
   }
     
-
-  private def completeRound() {
+  private def completeRound() = {
     alive = (currentRoundState.alive == 3 || (currentRoundState.alive == 2 && alive))
     currentRound = currentRound + 1
     sendState

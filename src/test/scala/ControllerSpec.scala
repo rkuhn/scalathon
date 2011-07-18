@@ -1,4 +1,4 @@
-package akka.tutorial.conway
+package akka.tutorials.conway
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{WordSpec, BeforeAndAfterAll}

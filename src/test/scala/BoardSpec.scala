@@ -1,4 +1,4 @@
-package akka.tutorial.conway
+package akka.tutorials.conway
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{WordSpec, BeforeAndAfterAll}
@@ -16,7 +16,7 @@ class BoardSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with
 
     "A BoardActor must" should {
       "send back an empty board" in {
-        val boardActor = actorOf(new Board(1, 1, testActor)).start()
+        val boardActor = actorOf(new Board(1, 1, testActor, testActor)).start()
         
         within (1000 millis) {
           boardActor !  CellToBoard(true, 0 , 0, 0)
