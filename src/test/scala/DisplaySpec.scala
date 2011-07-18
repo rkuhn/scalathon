@@ -20,7 +20,7 @@ class DisplaySpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers wi
 
   "An ASCIIDisplay " should {
     " should print out a boardState " in {
-      val displayActor = actorOf(new ASCIIDisplay()).start
+      val displayActor = actorOf(new ASCIIDisplay()).start()
       within (1000 millis) {
         displayActor ! BoardState(0, boardState)
       }

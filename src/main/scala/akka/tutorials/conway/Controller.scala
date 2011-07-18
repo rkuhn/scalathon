@@ -13,8 +13,8 @@ object Controller extends App {
 
   val initialStartState = Array.ofDim[Boolean](xSize, ySize)
 
-  val display = actorOf(new ASCIIDisplay).start
-  val controller = actorOf(new Controller(initialStartState, 5, display)).start
+  val display = actorOf(new ASCIIDisplay).start()
+  val controller = actorOf(new Controller(initialStartState, 5, display)).start()
 
   controller ! ControllerInitialize
   controller ! ControllerStart
@@ -56,7 +56,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     
     for (x <- 0 until xSize){
       for (y <- 0 until ySize){ 
-        cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start
+        cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start()
       }
     }
     initializeCells()
