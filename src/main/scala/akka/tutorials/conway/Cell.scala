@@ -21,13 +21,12 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
       this.alive = alive
       this.neighbors = neighbors
-      become(initialized)
-      
+      become(initialized)   
   }
 
   def initialized:Receive = {
     case ControllerToCellStart =>  sendState
-    case CellToCell(alive:Boolean, round:Int) => 
+    case CellToCell(alive:Boolean, round:Int) =>
       val neighborsState = roundToNeighborsState.getOrElse(round, new NeighborsState())
       neighborsState.update(alive)
       roundToNeighborsState += round -> neighborsState
@@ -45,7 +44,8 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   }
     
   private def completeRound() = {
-    alive = (currentRoundState.alive == 3 || (currentRoundState.alive == 2 && alive))
+    val neighborsState = roundToNeighborsState(currentRound)
+    alive = (neighborsState.alive == 3 || (neighborsState.alive == 2 && alive))
     currentRound = currentRound + 1
     sendState
     currentRoundState = nextRoundState

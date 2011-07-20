@@ -8,8 +8,8 @@ import collection.mutable.ArrayBuffer
 
 object Controller extends App {
 
-  val xSize = 2
-  val ySize = 1
+  val xSize = 3
+  val ySize = 3
 
   val initialStartState = Array.ofDim[Boolean](xSize, ySize)
 
@@ -32,18 +32,20 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
   var cells:Array[Array[ActorRef]] = _
 
-  var cellRegistrationCount = 0
-
   val boundaryCell = actorOf(new BoundaryCell).start()
   
   override def receive = {
-    case ControllerInitialize => controllerInitialize() 
+    case ControllerInitialize => controllerInitialize()
+  }
+  
+  def initialized: Receive = {
     case ControllerStart => controllerStart()
-    case BoardToControllerAdvanceRound  => advanceRound()
+    case BoardToControllerAdvanceRound => advanceRound()
+    case BoardToControllerDisplayRound(round: Int) => displayRound(round)
   }
   
   // create the Cells
-  def controllerInitialize() {
+  private def controllerInitialize() {
     if (initialStartState.isEmpty)
       throw new IllegalArgumentException("The initial start state must not be an empty list")
       
@@ -60,10 +62,11 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
       }
     }
     initializeCells()
+    become(initialized)
   }
   
   // Send the initialization message to each cell
-  def initializeCells(){
+  private def initializeCells(){
 
      // Initialize all the cells
     for (x <- 0 to xSize-1){
@@ -81,29 +84,29 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     }
   }  
   
-  def advanceRound() = {
+  private def advanceRound() = {
     currentRound += 1
-    if(currentRound == maxRounds) cells.flatten.foreach(_ ! ControllerToCellStop)      
+    if(currentRound < maxRounds) {
+      
+      self.reply(true)
+    } else {
+      self.reply(false)
+      cells.flatten.foreach(_ ! ControllerToCellStop)
+    }     
   }
   
-  def controllerStart() {
-    if(initialStartState.isEmpty) {
-      throw new IllegalStateException("The game has not been initialized")
-    }
-    
-    //Start each cell
-    cells.flatten.foreach(_ ! ControllerToCellStart)
-  }
+  private def controllerStart() = cells.flatten.foreach(_ ! ControllerToCellStart)
 
     /**
      * This will return the neighbor located at (x)(y)
      * If that location is a boundary, then the boundary cell will be returned
      */
-  def getNeighbor(x:Int, y:Int):ActorRef = {
+  private def getNeighbor(x:Int, y:Int):ActorRef = {
     if (x<0 || y <0 || x >= xSize || y >= ySize)
       boundaryCell
     else
       cells(x)(y)
   }
-
+  
+  private def displayRound(round: Int) = self.reply(round < maxRounds)
 }

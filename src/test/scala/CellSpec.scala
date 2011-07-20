@@ -9,7 +9,7 @@ import akka.testkit.TestKit
 import akka.util.duration._
 
 class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with TestKit {
-  val controller = actorOf(new ControllerStub(testActor)).start()
+  val controller = actorOf(new LocalControllerStub(testActor)).start()
   val board = actorOf(new BoardStub(testActor)).start()
   var cell = actorOf(new Cell(0,0,controller,board))
 
@@ -23,6 +23,7 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
   }
 
   "A Cell" should {
+    
     "error upon attempt to start before initialized " in {
       within(1000 millis) {
         evaluating {
@@ -30,6 +31,7 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
         } should produce [UnhandledMessageException]
       }
     }
+    
     "error upon attempt to respond to other cells before initialized " in {
       within(1000 millis) {
         evaluating {
@@ -52,7 +54,7 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       }
     }
     "notify the board its alive when it receives 3 alive and 5 dead neighbor messages" in {
-      within (1000 millis) {
+      within (10000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
         cell ! ControllerToCellInitialize(true, neighbors)
@@ -68,13 +70,14 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       }
     }
     "notify the board its dead when it recieves 1 alive and 7 dead neighbor messages" in {
-      within (1000 millis) {
+      within (2000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
         cell ! ControllerToCellInitialize(true, neighbors)
         cell ! ControllerToCellStart
-        expectMsg(('neighbor, 1, CellToCell(true, 0)))
-        expectMsg(('board, CellToBoard(true, 0, 0, 0)))
+        expectMsgAllOf(
+          ('neighbor, 1, CellToCell(true, 0)),
+          ('board, CellToBoard(true, 0, 0, 0)))
         cell ! CellToCell(true, 0)
         for (i <- 1 to 7) cell ! CellToCell(false, 0)
         expectMsgAllOf(
@@ -91,7 +94,7 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
   }
 }
 
-class ControllerStub(testActor:ActorRef) extends Actor {
+class LocalControllerStub(testActor:ActorRef) extends Actor {
   def receive = {
     case msg => testActor ! ('controller, msg)
   }

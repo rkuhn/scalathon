@@ -7,7 +7,9 @@ case object ControllerInitialize
 case object ControllerToCellStart
 case object ControllerToCellStop 
 case object ControllerStart
+
 case object BoardToControllerAdvanceRound
+case class BoardToControllerDisplayRound(round: Int)
 
 case class CellRegistration(x:Int, y:Int)
 case class CellToCell(alive:Boolean, round:Int)

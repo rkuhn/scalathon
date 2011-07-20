@@ -14,7 +14,7 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef) e
   val messageCountPerRound = Map[Int, Int]()
   
   var currentRound = 0
-
+  
   /**
    * Create an empty board.  This should be called on new rounds.
    */
@@ -22,8 +22,11 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef) e
     Array.ofDim[Boolean](xSize, ySize)    
   }
 
+  def complete: Receive = {
+    case _ =>
+  }
+  
   def receive = {
-    // Handle the CellToBoard message
     case CellToBoard(alive:Boolean, round:Int, x:Int, y:Int) => {
       if (boardList.size <= round)
         boardList = boardList :+ createBoard()
@@ -32,12 +35,19 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef) e
 
       messageCountPerRound += round -> (messageCountPerRound.getOrElse(round, 0) + 1)
       
-      if(messageCountPerRound(round) == xSize * ySize) {
+      val future = controllerRef ? BoardToControllerDisplayRound(round)
+      val displayRound: Any = future.get
+      
+      if( (messageCountPerRound(round) == xSize * ySize) && (displayRound == true)) {
+          val continue = controllerRef ? BoardToControllerAdvanceRound
+          if(continue == false) {
+            become(complete)
+          }
           //board is complete
           currentRound += 1
           val boardState = boardList(round).clone()
+
           displayRef ! BoardState(round, boardState)
-          controllerRef ! BoardToControllerAdvanceRound
       }
     }
   }
