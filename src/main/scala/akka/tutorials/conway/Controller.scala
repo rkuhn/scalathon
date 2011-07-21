@@ -2,7 +2,6 @@ package akka.tutorials.conway
 
 import akka.actor.{ActorRef, Actor}
 import akka.actor.Actor._
-import javax.management.remote.rmi._RMIConnection_Stub
 import scala.Array._
 import collection.mutable.ArrayBuffer
 
@@ -44,7 +43,9 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     case BoardToControllerDisplayRound(round: Int) => displayRound(round)
   }
   
-  // create the Cells
+  /**
+   * Initalize the game. The game is initialized with the state from construction. 
+   */
   private def controllerInitialize() {
     if (initialStartState.isEmpty)
       throw new IllegalArgumentException("The initial start state must not be an empty list")
@@ -65,7 +66,9 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     become(initialized)
   }
   
-  // Send the initialization message to each cell
+  /**
+  * Initializes all cells in the board
+  */
   private def initializeCells(){
 
      // Initialize all the cells
@@ -78,12 +81,14 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
                 neighbors += getNeighbor(x+xOffset, y+yOffset)
             }
         }
-        //on initalization, let's block until we know that all cells are successfully initialized
         cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
       }
     }
   }  
   
+  /**
+   * Advances the round of the game. If the game is at its max round, then this repies with false. Otherwise true.
+   */
   private def advanceRound() = {
     currentRound += 1
     if(currentRound < maxRounds) {
@@ -95,6 +100,9 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     }     
   }
   
+  /**
+   * Tell each cell to start
+   */
   private def controllerStart() = cells.flatten.foreach(_ ! ControllerToCellStart)
 
     /**
