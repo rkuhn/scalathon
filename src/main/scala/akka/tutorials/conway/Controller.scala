@@ -22,14 +22,13 @@ object Controller extends App {
 
 class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, displayActor:ActorRef) extends Actor{
 
-  var xSize:Int = 0
-  var ySize:Int = 0
   var currentRound = 0
   
   // Create the Board actor
-  var boardActor:ActorRef = _
-
-  var cells:Array[Array[ActorRef]] = _
+  val xSize = initialStartState.size
+  val ySize = initialStartState(0).size
+  val boardActor = actorOf(new Board(xSize, ySize, displayActor, this.self)).start()
+  val cells = Array.tabulate(xSize, ySize)((x, y) => actorOf(new Cell(x, y, self, boardActor)).start())
 
   val boundaryCell = actorOf(new BoundaryCell).start()
   
@@ -49,19 +48,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   private def controllerInitialize() {
     if (initialStartState.isEmpty)
       throw new IllegalArgumentException("The initial start state must not be an empty list")
-      
-    xSize = initialStartState.size
-    ySize = initialStartState(0).size
-
-    boardActor = actorOf(new Board(xSize, ySize, displayActor, this.self)).start()
-
-    cells = Array.ofDim[ActorRef](xSize, ySize)
     
-    for (x <- 0 until xSize){
-      for (y <- 0 until ySize){ 
-        cells(x)(y) = actorOf(new Cell(x,y,this.self, boardActor)).start()
-      }
-    }
     initializeCells()
     become(initialized)
   }
@@ -70,29 +57,26 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   * Initializes all cells in the board
   */
   private def initializeCells(){
-
      // Initialize all the cells
     for (x <- 0 to xSize-1){
       for (y <- 0 to ySize-1){
-        var neighbors = new ArrayBuffer[ActorRef] ()
-
-        for (xOffset <- -1 to 1){
-            for (yOffset <- -1 to 1){
-                neighbors += getNeighbor(x+xOffset, y+yOffset)
-            }
-        }
-        cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
+        val neighbors = for {
+          xOffset <- (-1) to 1
+          yOffset <- (-1) to 1
+          } yield {
+            getNeighbor(x+xOffset, y+yOffset)
+          }
+          cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
+        }        
       }
-    }
-  }  
+    }  
   
   /**
    * Advances the round of the game. If the game is at its max round, then this repies with false. Otherwise true.
    */
   private def advanceRound() = {
     currentRound += 1
-    if(currentRound < maxRounds) {
-      
+    if(currentRound < maxRounds) {  
       self.reply(true)
     } else {
       self.reply(false)
