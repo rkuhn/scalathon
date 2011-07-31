@@ -15,7 +15,6 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   var currentRound:Int = 0
   var currentRoundState:NeighborsState = new NeighborsState()
   var nextRoundState:NeighborsState = new NeighborsState() 
-  val roundToNeighborsState = Map[Int, NeighborsState]()
   
   override def receive = {
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
@@ -27,10 +26,15 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   def initialized:Receive = {
     case ControllerToCellStart =>  sendState
     case CellToCell(alive:Boolean, round:Int) =>
-      val neighborsState = roundToNeighborsState.getOrElse(round, new NeighborsState())
-      neighborsState.update(alive)
-      roundToNeighborsState += round -> neighborsState
-      if (neighborsState.isComplete) completeRound
+      if (currentRound == round) {
+        currentRoundState.update(alive) 
+        if(currentRoundState.isComplete) completeRound
+      } else if (currentRound + 1 == round) {
+        nextRoundState.update(alive)
+      } else {
+
+        //println("more than 1 round ahead!")
+      }
     case ControllerToCellStop => become(stopped)
   }
   
@@ -42,15 +46,14 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
     neighbors.foreach(n => n ! CellToCell(alive, currentRound))
     board ! CellToBoard(alive, currentRound, x, y)
   }
-    
-  private def completeRound() = {
-    val neighborsState = roundToNeighborsState(currentRound)
-    alive = (neighborsState.alive == 3 || (neighborsState.alive == 2 && alive))
-    currentRound = currentRound + 1
-    sendState
-    currentRoundState = nextRoundState
-    nextRoundState = new NeighborsState
-  }
+
+  private def completeRound() {
+     alive = (currentRoundState.alive == 3 || (currentRoundState.alive == 2 && alive))
+     currentRound = currentRound + 1
+     sendState
+     currentRoundState = nextRoundState
+     nextRoundState = new NeighborsState
+   }
 
 }
 
