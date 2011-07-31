@@ -32,8 +32,6 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
 
   val boundaryCell = actorOf(new BoundaryCell).start()
   
-  val silentCell = actorOf(new SilentCell).start()
-  
   override def receive = {
     case ControllerInitialize => controllerInitialize()
   }
@@ -65,12 +63,9 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
         val neighbors = for {
           xOffset <- (-1) to 1
           yOffset <- (-1) to 1
+          if( xOffset != 0 || yOffset != 0)
           } yield {
-            if( xOffset != 0 || yOffset != 0) {
               getNeighbor(x+xOffset, y+yOffset)
-            } else {
-              silentCell
-            }
           }
           cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
         }        

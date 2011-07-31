@@ -10,9 +10,3 @@ class BoundaryCell extends Actor {
     case CellToCell(alive:Boolean, round:Int) => self.reply(CellToCell(false, round))
   }
 }
-
-class SilentCell extends Actor {
-  override def receive = {
-    case CellToCell(alive:Boolean, round:Int) => 
-  }
-}
