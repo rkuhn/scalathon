@@ -15,6 +15,7 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
   var currentRound:Int = 0
   var currentRoundState:NeighborsState = new NeighborsState()
   var nextRoundState:NeighborsState = new NeighborsState() 
+
   
   override def receive = {
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
@@ -65,15 +66,10 @@ class NeighborsState {
   private var alive_ = 0
 
   def update(alive:Boolean) {
-    if (alive) incrementAlive else incrementDead
+    if (alive) alive_ += 1 else dead_ += 1
   }
 
   def alive = alive_
   def isComplete:Boolean = dead_ + alive_ == 8
-
-  /* Get rid of these, or make private? */
-  def incrementDead() { dead_ = dead_ + 1 }
-
-  def incrementAlive() { alive_ = alive_ + 1 }
 }
 
