@@ -39,16 +39,12 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   def initialized: Receive = {
     case ControllerStart => controllerStart()
     case BoardToControllerAdvanceRound => advanceRound()
-    case BoardToControllerDisplayRound(round: Int) => displayRound(round)
   }
   
   /**
    * Initalize the game. The game is initialized with the state from construction. 
    */
-  private def controllerInitialize() {
-    if (initialStartState.isEmpty)
-      throw new IllegalArgumentException("The initial start state must not be an empty list")
-    
+  private def controllerInitialize() = {
     initializeCells()
     become(initialized)
   }
@@ -56,7 +52,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   /**
   * Initializes all cells in the board
   */
-  private def initializeCells(){
+  private def initializeCells() = {
      // Initialize all the cells
     for (x <- 0 to xSize-1){
       for (y <- 0 to ySize-1){
@@ -100,6 +96,4 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
     else
       cells(x)(y)
   }
-  
-  private def displayRound(round: Int) = self.reply(round < maxRounds)
 }
