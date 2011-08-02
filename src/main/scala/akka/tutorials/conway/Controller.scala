@@ -30,7 +30,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   val boardActor = actorOf(new Board(xSize, ySize, displayActor, this.self, maxRounds)).start()
   val cells = Array.tabulate(xSize, ySize)((x, y) => actorOf(new Cell(x, y, self, boardActor)).start())
 
-  val boundaryCell = actorOf(new BoundaryCellPool).start()
+  val boundaryCell = actorOf(new BoundaryCell).start()
   
   override def receive = {
     case ControllerInitialize => controllerInitialize()
