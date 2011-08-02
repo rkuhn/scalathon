@@ -9,7 +9,6 @@ case object ControllerToCellStop
 case object ControllerStart
 
 case object BoardToControllerAdvanceRound
-case class BoardToControllerDisplayRound(round: Int)
 
 case class CellRegistration(x:Int, y:Int)
 case class CellToCell(alive:Boolean, round:Int)
@@ -33,7 +32,7 @@ case class BoardState(round:Int, boardState:Array[Array[Boolean]]) {
           }
         }
         
-        (round == state.round) 
+        (round == state.round && isEqual) 
       } 
       case _ => false
     }
