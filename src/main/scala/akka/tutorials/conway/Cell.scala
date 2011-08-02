@@ -34,7 +34,6 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
         nextRoundState.update(alive)
       } else {
 
-        //println("more than 1 round ahead!")
       }
     case ControllerToCellStop => become(stopped)
   }
