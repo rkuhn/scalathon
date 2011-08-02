@@ -35,7 +35,7 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef, m
 
       messageCountPerRound += round -> (messageCountPerRound.getOrElse(round, 0) + 1)
       
-      if( (messageCountPerRound(round) == xSize * ySize) && ( round <= maxRounds)) {
+      if( (messageCountPerRound(round) == xSize * ySize) && ( round < maxRounds)) {
           val continue = controllerRef ? BoardToControllerAdvanceRound
           if(continue == false) {
             become(complete)
