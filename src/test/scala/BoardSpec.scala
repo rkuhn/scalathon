@@ -28,7 +28,7 @@ class BoardSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with
       "try to render a board if the BoardToControllerDisplayRound returns true" in {
         
         val controllerStub = actorOf(new ControllerStub(testActor, true)).start()        
-        val boardActor = actorOf(new Board(1, 1, testActor, controllerStub)).start()
+        val boardActor = actorOf(new Board(1, 1, testActor, controllerStub,5)).start()
         
         within (2000 millis) {
           boardActor !  CellToBoard(true, 0 , 0, 0)
@@ -36,20 +36,9 @@ class BoardSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with
         }
       }
       
-      "not try to render a board if the BoardToControllerDisplayRound returns false" in {
-        
-        val controllerStub = actorOf(new ControllerStub(testActor, false)).start()
-        val boardActor = actorOf(new Board(1, 1, testActor, controllerStub)).start()
-        
-        within (2000 millis) {
-          boardActor !  CellToBoard(true, 0 , 0, 0)
-          expectNoMsg
-        }
-      }
-      
       "send a message to the display actor if the board is complete." in {
         val controllerStub = actorOf(new ControllerStub(testActor, true)).start()
-        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub)).start()
+        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub,5)).start()
         
         within (3000 millis) {
           for (i <- 1 to 9) {
@@ -61,7 +50,7 @@ class BoardSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with
       }
       "send not message to the display actor if the board is complete." in {
         val controllerStub = actorOf(new ControllerStub(testActor, true)).start()
-        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub)).start()
+        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub,5)).start()
         
         within (3000 millis) {
           for (i <- 1 to 6) {
@@ -73,7 +62,7 @@ class BoardSpec extends WordSpec with BeforeAndAfterAll with ShouldMatchers with
       }
       "send a board that shows all cells are alive if every message received indicates that a cell is alive." in {
         val controllerStub = actorOf(new ControllerStub(testActor, true)).start()
-        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub)).start()
+        val boardActor = actorOf(new Board(3, 3, testActor, controllerStub,5)).start()
         val board = createBoard(3,3, true)
         
         within (3000 millis) {

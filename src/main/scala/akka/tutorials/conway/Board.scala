@@ -7,7 +7,7 @@ import scala.collection.mutable.Map
  * This represents the overall board.  Each cell tells the board their state on a round per round basis.
  * Once the board has received the state for all cells in a round it should send the complete board to the display actor.
  */
-class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef) extends Actor{
+class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef, maxRounds: Int) extends Actor{
 
   var boardList = List[Array[Array[Boolean]]]()
   
@@ -35,10 +35,7 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef) e
 
       messageCountPerRound += round -> (messageCountPerRound.getOrElse(round, 0) + 1)
       
-      val future = controllerRef ? BoardToControllerDisplayRound(round)
-      val displayRound: Any = future.get
-      
-      if( (messageCountPerRound(round) == xSize * ySize) && (displayRound == true)) {
+      if( (messageCountPerRound(round) == xSize * ySize) && ( round <= maxRounds)) {
           val continue = controllerRef ? BoardToControllerAdvanceRound
           if(continue == false) {
             become(complete)

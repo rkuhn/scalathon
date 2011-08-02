@@ -67,7 +67,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
           } yield {
               getNeighbor(x+xOffset, y+yOffset)
           }
-          cells(x)(y) ? ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
+          cells(x)(y) ! ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
         }        
       }
     }  
