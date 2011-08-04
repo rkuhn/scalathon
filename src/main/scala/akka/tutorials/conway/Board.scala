@@ -9,7 +9,7 @@ import scala.collection.mutable.Map
  */
 class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef, maxRounds: Int) extends Actor{
 
-  var boardList = List[Array[Array[Boolean]]]()
+  var boardList = IndexedSeq[Array[Array[Boolean]]]()
   
   val messageCountPerRound = Map[Int, Int]()
   
@@ -28,8 +28,10 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef, m
   
   def receive = {
     case CellToBoard(alive:Boolean, round:Int, x:Int, y:Int) => {
-      if (boardList.size <= round)
-        boardList = boardList :+ createBoard()
+      if (boardList.size <= round) {
+        boardList ++= Seq.fill(round - boardList.size + 1)(createBoard())
+      }
+      
       // Set the alive or dead
       boardList(round)(x)(y) = alive
 
