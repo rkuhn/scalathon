@@ -28,7 +28,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
   val xSize = initialStartState.size
   val ySize = initialStartState(0).size
   val boardActor = actorOf(new Board(xSize, ySize, displayActor, this.self, maxRounds)).start()
-  val cells = Array.tabulate(xSize, ySize)((x, y) => actorOf(new Cell(x, y, self, boardActor)).start())
+  val cells = Array.tabulate(xSize, ySize)((x, y) => actorOf(new Cell(x, y, self, boardActor), "cell"+ x + y).start())
 
   val boundaryCell = actorOf(new BoundaryCell).start()
   
@@ -66,19 +66,15 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
           cells(x)(y) ! ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
         }        
       }
+      self.reply(true)
     }  
   
   /**
-   * Advances the round of the game. If the game is at its max round, then this repies with false. Otherwise true.
+   * Advances the round of the game. If the game is at its max round, tell Cells to stop
    */
   private def advanceRound() = {
     currentRound += 1
-    if(currentRound < maxRounds) {  
-      self.reply(true)
-    } else {
-      self.reply(false)
-      cells.flatten.foreach(_ ! ControllerToCellStop)
-    }     
+    if(currentRound >= maxRounds) cells.flatten.foreach(_ ! ControllerToCellStop)
   }
   
   /**

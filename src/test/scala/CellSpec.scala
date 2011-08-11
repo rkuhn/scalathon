@@ -40,13 +40,14 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       }
     }
     "notify neighbors of current state on startup" in {
-      within(200 millis) {
+      within(2000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(
           actorOf(new NeighborStub(testActor, 1)).start, 
           actorOf(new NeighborStub(testActor, 2)).start, 
           actorOf(new NeighborStub(testActor, 3)).start)
-        cell ! ControllerToCellInitialize(true, neighbors)
+        val result = (cell ? ControllerToCellInitialize(true, neighbors)).await.get
+        result should equal (true)
         cell ! ControllerToCellStart
         val expectedMessages:List[Object] = (1 to 3).map(('neighbor, _, CellToCell(true, 0))).toList
         expectMsgAllOf(
