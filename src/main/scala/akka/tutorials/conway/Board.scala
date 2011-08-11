@@ -38,14 +38,11 @@ class Board(xSize:Int, ySize:Int, displayRef:ActorRef, controllerRef:ActorRef, m
       messageCountPerRound += round -> (messageCountPerRound.getOrElse(round, 0) + 1)
       
       if( (messageCountPerRound(round) == xSize * ySize) && ( round < maxRounds)) {
-          val continue = controllerRef ? BoardToControllerAdvanceRound
-          if(continue == false) {
-            become(complete)
-          }
-          //board is complete
           currentRound += 1
+          //the current round is greater than or equal to the max rounds so let's stop receiving msgs
+          if(currentRound >= maxRounds) become(complete) 
+          
           val boardState = boardList(round).clone()
-
           displayRef ! BoardState(round, boardState)
       }
     }
