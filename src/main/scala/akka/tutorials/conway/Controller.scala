@@ -66,7 +66,7 @@ class Controller(initialStartState:Array[Array[Boolean]], maxRounds:Int, display
           cells(x)(y) ! ControllerToCellInitialize(initialStartState(x)(y), neighbors.toArray) 
         }        
       }
-      self.reply(true)
+      self.tryReply(true)
     }  
   
   /**
