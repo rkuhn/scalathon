@@ -29,7 +29,8 @@ class ControllerSpec extends WordSpec with BeforeAndAfterEach with ShouldMatcher
     "create all cells when initializing" in {
       val controllerActor = actorOf(new Controller(initialStartState, maxRounds, testActor)).start()
       within (1000 millis) {
-        (controllerActor ? ControllerInitialize).await.get
+        val result = (controllerActor ? ControllerInitialize).await.get
+        result should equal(true)
         val cells = Actor.registry.local.filter{_.address.startsWith("cell")}
         cells.size should equal (4)
       }

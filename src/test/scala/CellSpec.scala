@@ -11,7 +11,7 @@ import akka.util.duration._
 class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with TestKit {
   val controller = actorOf(new LocalControllerStub(testActor)).start()
   val board = actorOf(new BoardStub(testActor)).start()
-  var cell = actorOf(new Cell(0,0,controller,board))
+  var cell = actorOf(new Cell(0,0,controller,board)).start()
 
   override protected def afterEach() {
     cell.stop()
@@ -23,20 +23,20 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
   }
 
   "A Cell" should {
-    
+
     "error upon attempt to start before initialized " in {
       within(1000 millis) {
         evaluating {
           (startCellExpectingRegistration ? ControllerToCellStart).await.get
-        } should produce [UnhandledMessageException]
+        } should produce[UnhandledMessageException]
       }
     }
-    
+
     "error upon attempt to respond to other cells before initialized " in {
       within(1000 millis) {
         evaluating {
           (startCellExpectingRegistration ? ControllerToCellStart).await.get
-        } should produce [UnhandledMessageException]
+        } should produce[UnhandledMessageException]
       }
     }
     "notify neighbors of current state on startup" in {
@@ -58,7 +58,8 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       within (10000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
-        cell ! ControllerToCellInitialize(true, neighbors)
+        val result = (cell ? ControllerToCellInitialize(true, neighbors)).await.get
+        result should equal (true)
         cell ! ControllerToCellStart
         expectMsgAllOf(
           ('neighbor, 1, CellToCell(true, 0)),
@@ -74,7 +75,8 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       within (2000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
-        cell ! ControllerToCellInitialize(true, neighbors)
+        val result = (cell ? ControllerToCellInitialize(true, neighbors)).await.get
+        result should equal (true)
         cell ! ControllerToCellStart
         expectMsgAllOf(
           ('neighbor, 1, CellToCell(true, 0)),
@@ -90,7 +92,8 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       within (2000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
-        cell ! ControllerToCellInitialize(true, neighbors)
+        val result = (cell ? ControllerToCellInitialize(true, neighbors)).await.get
+        result should equal (true)
         cell ! ControllerToCellStart
         expectMsgAllOf(
           ('neighbor, 1, CellToCell(true, 0)),
@@ -106,7 +109,8 @@ class CellSpec extends WordSpec with BeforeAndAfterEach with ShouldMatchers with
       within (2000 millis) {
         cell = startCellExpectingRegistration()
         val neighbors = Array(actorOf(new NeighborStub(testActor, 1)).start)
-        cell ! ControllerToCellInitialize(true, neighbors)
+        val result = (cell ? ControllerToCellInitialize(true, neighbors)).await.get
+        result should equal (true)
         cell ! ControllerToCellStart
         expectMsgAllOf(
           ('neighbor, 1, CellToCell(true, 0)),

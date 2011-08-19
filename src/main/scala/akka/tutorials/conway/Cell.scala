@@ -21,7 +21,8 @@ class Cell(val x:Int, val y:Int, controller:ActorRef, val board:ActorRef) extend
     case ControllerToCellInitialize(alive:Boolean, neighbors:Array[ActorRef]) => 
       this.alive = alive
       this.neighbors = neighbors
-      become(initialized)   
+      become(initialized)
+      self.reply(true)
   }
 
   def initialized:Receive = {
